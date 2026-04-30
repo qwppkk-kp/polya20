@@ -280,19 +280,29 @@
         .footer-line:first-child { font-weight: 500; margin-bottom: 0.5rem; }
         .footer-line:last-child { font-size: 0.7rem; opacity: 0.8; }
 
-        /* ========== АНИМАЦИИ ПРИ СКРОЛЛЕ (ИСПРАВЛЕНО) ========== */
+        /* ========== АНИМАЦИИ ПРИ СКРОЛЛЕ (ИСПРАВЛЕНО - РАБОТАЕТ) ========== */
         .scroll-animate {
             opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        .scroll-animate.show {
-            opacity: 1;
-            transform: translateY(0);
+            transform: translateY(50px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            will-change: opacity, transform;
         }
         
-        footer { opacity: 0; animation: footerFadeIn 1s ease-out forwards; animation-delay: 0.5s; }
-        @keyframes footerFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .scroll-animate.show {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+        
+        /* Футер появляется сам */
+        footer { 
+            opacity: 0; 
+            animation: footerFadeIn 1s ease-out forwards; 
+            animation-delay: 0.5s; 
+        }
+        @keyframes footerFadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
 
         /* Текст с историей */
         .story-text {
@@ -364,6 +374,20 @@
             position: relative;
             top: -3px;   
         }
+        
+        /* Временные стили для отладки - покажет, что анимация работает */
+        .debug-info {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: black;
+            color: lime;
+            font-size: 10px;
+            padding: 5px;
+            z-index: 9999;
+            border-radius: 5px;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body>
@@ -375,7 +399,7 @@
 <div class="mobile-only">
     <!-- ЭКРАН 1 -->
     <section class="one">
-        <img src="images/цифра.svg" alt="Открытка приглашение" class="img-1-1 scroll-animate">
+        <img src="images/цифра.svg" alt="Открытка приглашение" class="img-1-1 scroll-animate" onerror="this.style.display='none'">
         <div class="text-block img-1-2 scroll-animate">
             <div class="invitation-line1">ПРИГЛАШЕНИЕ НА</div>
             <div class="invitation-line2">день рождение</div>
@@ -393,8 +417,8 @@
                 Это я, маленькая <span class="story-name">Поля,</span><br>и совсем скоро<br>мне исполнится 20 лет)<br>Я буду очень рада<br>если вы будете со мной<br>в этот праздничный день!
             </div>
         </div>
-        <img src="images/полька.svg" alt="" class="img-2-3 scroll-animate">
-        <img src="images/полосочка.svg" alt="" class="img-2-4">
+        <img src="images/полька.svg" alt="" class="img-2-3 scroll-animate" onerror="this.style.display='none'">
+        <img src="images/полосочка.svg" alt="" class="img-2-4" onerror="this.style.display='none'">
     </section>
 
     <!-- ЭКРАН 3 -->
@@ -427,7 +451,7 @@
         <div class="text-block img-3-3 scroll-animate">
             <div class="date-text">30 мая 2026 года</div>
         </div>
-        <img src="images/цветочек_календарь.svg" alt="" class="img-3-4">
+        <img src="images/цветочек_календарь.svg" alt="" class="img-3-4" onerror="this.style.display='none'">
     </section>
 
     <!-- ЭКРАН 4 -->
@@ -445,7 +469,7 @@
 
         <button class="map-button scroll-animate" onclick="openMap()">Открыть карту</button>
 
-        <img src="images/цветок_адрес.svg" alt="" class="img-4-4">
+        <img src="images/цветок_адрес.svg" alt="" class="img-4-4" onerror="this.style.display='none'">
     </section>
 
     <!-- ЭКРАН 5 -->
@@ -466,7 +490,7 @@
                 увидеть каждого из вас!
             </div>
         </div>
-        <img src="images/цветок_последний.svg" alt="" class="img-6-2">
+        <img src="images/цветок_последний.svg" alt="" class="img-6-2" onerror="this.style.display='none'">
     </section>
 </div>
 
@@ -492,18 +516,49 @@
         window.open(url, '_blank');
     }
 
+    // Улучшенная функция анимации с принудительным срабатыванием
     function initScrollAnimations() {
         const animatedElements = document.querySelectorAll('.scroll-animate');
+        
+        // Сразу показываем элементы на первом экране
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('show');
+                    // Можно отключить наблюдение после показа
+                    observer.unobserve(entry.target);
                 }
             });
-        }, { threshold: 0.15, rootMargin: '0px 0px -20px 0px' });
-        animatedElements.forEach(el => observer.observe(el));
+        }, { 
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        });
+        
+        animatedElements.forEach(el => {
+            observer.observe(el);
+            // Если элемент уже виден, добавим класс немедленно
+            const rect = el.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            if (rect.top < windowHeight - 100) {
+                el.classList.add('show');
+                observer.unobserve(el);
+            }
+        });
     }
-    document.addEventListener('DOMContentLoaded', initScrollAnimations);
+    
+    // Запускаем анимацию после загрузки DOM
+    document.addEventListener('DOMContentLoaded', function() {
+        initScrollAnimations();
+    });
+    
+    // Запускаем также после загрузки всех изображений
+    window.addEventListener('load', function() {
+        initScrollAnimations();
+    });
+    
+    // На всякий случай повторяем через небольшую задержку
+    setTimeout(initScrollAnimations, 100);
+    setTimeout(initScrollAnimations, 500);
 </script>
 
 </body>
