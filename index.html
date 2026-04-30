@@ -280,13 +280,17 @@
         .footer-line:first-child { font-weight: 500; margin-bottom: 0.5rem; }
         .footer-line:last-child { font-size: 0.7rem; opacity: 0.8; }
 
-        /* Анимации при скролле */
+        /* ========== АНИМАЦИИ ПРИ СКРОЛЛЕ (ИСПРАВЛЕНО) ========== */
         .scroll-animate {
             opacity: 0;
             transform: translateY(30px);
             transition: opacity 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
-        .scroll-animate.show { opacity: 1; transform: translateY(0); }
+        .scroll-animate.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
         footer { opacity: 0; animation: footerFadeIn 1s ease-out forwards; animation-delay: 0.5s; }
         @keyframes footerFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -335,7 +339,7 @@
 
         /* Буква "В" */
         .time-letter {
-            font-family: ''Times New Roman', serif;
+            font-family: 'Times New Roman', serif;
             font-size: 40px;
             color: #833C40;
             margin-right: 10px;
@@ -360,11 +364,6 @@
             position: relative;
             top: -3px;   
         }
-
-        .scroll-animate {
-    opacity: 1 !important;
-    transform: none !important;
-}
     </style>
 </head>
 <body>
